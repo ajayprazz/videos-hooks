@@ -1,0 +1,35 @@
+import { useState, useEffect } from "react";
+import youtube, { baseParams } from "../apis/youtube";
+
+const useVideos = defaultSearchTerm => {
+  const [videos, setVideos] = useState([]);
+
+  useEffect(() => {
+    search(defaultSearchTerm);
+  }, [defaultSearchTerm]);
+
+  const search = async term => {
+    const response = await youtube.get("/search", {
+      params: {
+        ...baseParams,
+        q: term,
+      },
+    });
+    setVideos(response.data.items);
+  };
+
+  const relatedSearch = async video => {
+    const relatedVideos = await youtube.get("/search", {
+      params: {
+        ...baseParams,
+        relatedToVideoId: video.id.videoId,
+      },
+    });
+
+    setVideos(relatedVideos.data.items);
+  };
+
+  return [videos, search, relatedSearch];
+};
+
+export default useVideos;
